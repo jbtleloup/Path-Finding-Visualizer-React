@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import PathFindingVisualiser from "./PathFindingVisualizer/PathFindingVisualizer";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            gridId: 0,
+        }
+    }
+
+    // By updating the key of a Component we force the Dom to rerender
+    // and erase the previous Grid
+    resetGrid() {
+        this.setState((state) => {
+            return {gridId: state.gridId + 1}
+        })
+    }
+
+    render() {
+        let uniqueId = this.state.gridId;
+        return (
+            <div className="App">
+                <button onClick={() => this.resetGrid()}>
+                    Reset Grid
+                </button>
+                <PathFindingVisualiser key={uniqueId}/>
+            </div>
+        );
+    }
 }
 
 export default App;
