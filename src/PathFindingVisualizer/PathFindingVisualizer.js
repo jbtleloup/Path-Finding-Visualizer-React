@@ -3,6 +3,7 @@ import Node from './Node/Node';
 import {dijkstra, getNodesInShortestPathOrder} from '../Algorithms/Dijkstra';
 
 import './PathfindingVisualizer.css';
+import {bellmanFord, getNodesInShortestPathOrderBF} from "../Algorithms/BellmanFord";
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
@@ -32,7 +33,7 @@ export default class PathfindingVisualizer extends Component {
         document.addEventListener("keydown", this.wPressed, false);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         document.removeEventListener("keydown", this.wPressed, false);
     }
 
@@ -42,9 +43,8 @@ export default class PathfindingVisualizer extends Component {
         if (finishDijkstra) this.visualizeDijkstra(false);
     }
 
-    wPressed(event){
-        if(event.keyCode === 87) {
-            console.log("test");
+    wPressed(event) {
+        if (event.keyCode === 87) {
             this.setState({wKeyIsPressed: !this.state.wKeyIsPressed})
         }
     }
@@ -57,7 +57,7 @@ export default class PathfindingVisualizer extends Component {
                 this.setState({endIsPressed: true, mouseIsPressed: true, previousEnd: {row, col}});
             } else {
                 let newGrid;
-                if(this.state.wKeyIsPressed){
+                if (this.state.wKeyIsPressed) {
                     newGrid = getNewGridWithWeightToggled(this.state.grid, row, col);
                 } else {
                     newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
@@ -71,7 +71,7 @@ export default class PathfindingVisualizer extends Component {
         if (!this.state.mouseIsPressed) return;
         if (!this.state.startIsPressed && !this.state.endIsPressed) {
             let newGrid;
-            if(this.state.wKeyIsPressed){
+            if (this.state.wKeyIsPressed) {
                 newGrid = getNewGridWithWeightToggled(this.state.grid, row, col);
             } else {
                 newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
@@ -187,8 +187,44 @@ export default class PathfindingVisualizer extends Component {
 
     }
 
-    visualizeBellmanFord() {
+    animateBellmanFord(visitedNodesInOrder, nodesInShortestPathOrder) {
+        this.setState({isAnimation: true});
 
+        visitedNodesInOrder = visitedNodesInOrder.filter( node => (!node.isStart && !node.isFinish));
+
+        // We don't want the animation to cover the end Node (hence - 1)
+        const visitedNodesInOrderLength = visitedNodesInOrder.length - 1;
+
+        for (let i = 0; i <= visitedNodesInOrderLength; i++) {
+            setTimeout(() => {
+                const node = visitedNodesInOrder[i];
+                if (i>0) {
+                    const previousNode = visitedNodesInOrder[i-1];
+                    document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
+                }
+                if (i === visitedNodesInOrderLength) {
+                    const previousNode = visitedNodesInOrder[i-1];
+                    document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
+                    setTimeout(() => {
+                        this.animateShortestPath(nodesInShortestPathOrder);
+                    }, 10);
+                    return;
+                }
+                //TODO: look to get rid off that document.getElementById maybe add to condition in Node.js
+                document.getElementById(`node-${node.row}-${node.col}`).className += ' node-visited-na';
+            }, 2*i);
+        }
+    }
+
+    visualizeBellmanFord() {
+        const {grid, previousStart, previousEnd} = this.state;
+        const startNode = grid[previousStart.row][previousStart.col];
+        const finishNode = grid[previousEnd.row][previousEnd.col];
+        const visitedNodesInOrder = bellmanFord(grid, startNode, finishNode);
+        const nodesInShortestPathOrder = getNodesInShortestPathOrderBF(finishNode);
+        //console.log(nodesInShortestPathOrder);
+        this.animateBellmanFord(visitedNodesInOrder, nodesInShortestPathOrder);
+        //this.animateShortestPath(nodesInShortestPathOrder);
     }
 
     render() {
