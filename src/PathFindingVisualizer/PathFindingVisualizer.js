@@ -119,6 +119,10 @@ export default class PathfindingVisualizer extends Component {
 
     animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
         this.setState({isAnimation: true});
+        //todo: length - 1 does not work -> impossible case gives us a grid
+        // not totally explored (last nod not visually explored)
+        // use bool isEnd instead
+
         // We don't want the animation to cover the end Node (hence - 1)
         const visitedNodesInOrderLength = visitedNodesInOrder.length - 1;
         // We start at 1 so the animation do not cover the start Node
@@ -141,9 +145,6 @@ export default class PathfindingVisualizer extends Component {
     animateShortestPath(nodesInShortestPathOrder) {
         // We start at one so the animation does not cover start node
         // same for end Node (length - 1)
-        //todo: length - 1 does not work -> impossible case gives us a grid
-        // not totally explored (last nod not visually explored)
-        // use bool isEnd instead
         for (let i = 1; i < nodesInShortestPathOrder.length - 1; i++) {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[i];
@@ -189,19 +190,19 @@ export default class PathfindingVisualizer extends Component {
 
     animateBellmanFord(visitedNodesInOrder, nodesInShortestPathOrder) {
         this.setState({isAnimation: true});
-
+        // No animation on start and finish node
         visitedNodesInOrder = visitedNodesInOrder.filter( node => (!node.isStart && !node.isFinish));
-
         // We don't want the animation to cover the end Node (hence - 1)
         const visitedNodesInOrderLength = visitedNodesInOrder.length - 1;
-
         for (let i = 0; i <= visitedNodesInOrderLength; i++) {
             setTimeout(() => {
                 const node = visitedNodesInOrder[i];
+                // Change background back to white
                 if (i>0) {
                     const previousNode = visitedNodesInOrder[i-1];
                     document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
                 }
+                // display shortest path and change background back to white to the last node
                 if (i === visitedNodesInOrderLength) {
                     const previousNode = visitedNodesInOrder[i-1];
                     document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
@@ -222,9 +223,7 @@ export default class PathfindingVisualizer extends Component {
         const finishNode = grid[previousEnd.row][previousEnd.col];
         const visitedNodesInOrder = bellmanFord(grid, startNode, finishNode);
         const nodesInShortestPathOrder = getNodesInShortestPathOrderBF(finishNode);
-        //console.log(nodesInShortestPathOrder);
         this.animateBellmanFord(visitedNodesInOrder, nodesInShortestPathOrder);
-        //this.animateShortestPath(nodesInShortestPathOrder);
     }
 
     render() {

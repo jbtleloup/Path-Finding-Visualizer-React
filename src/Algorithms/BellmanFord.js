@@ -1,55 +1,34 @@
-// Performs Dijkstra's algorithm; returns *all* nodes in the order
-// in which they were visited. Also makes nodes point back to their
+// Performs Bellman Ford's algorithm; returns a randomized array of visited nodes.
+// Also makes nodes point back to their
 // previous node, effectively allowing us to compute the shortest path
 // by backtracking from the finish node.
 export function bellmanFord(grid, startNode, finishNode) {
-    const visitedNodesInOrder = [];
+    const visitedNodes = [];
     startNode.distance = 0;
     const vertices = getAllNodes(grid).filter(node => !node.isWall);
     const edges = getEdges(vertices, grid);
     // copy the destination node
     // array randomized for the animation
     // this array is for animation only
-    visitedNodesInOrder.push(...edges.map(edge => edge[1]));
-    shuffleArray(visitedNodesInOrder);
+    visitedNodes.push(...edges.map(edge => edge[1]));
+    shuffleArray(visitedNodes);
 
-    for(let i=0;i<vertices.length - 1; i++) {
+    for (let i = 0; i < vertices.length - 1; i++) {
         edges.forEach(edge => relax(edge[0], edge[1], edge[1].isWeight));
     }
     // todo: negative cycle
-    //console.log(visitedNodesInOrder);
-    return visitedNodesInOrder;
-
-    // while (!!unvisitedNodes.length) {
-    //     const closestNode = unvisitedNodes.shift();
-    //     // If we encounter a wall, we skip it.
-    //     if (closestNode.isWall) continue;
-    //     // If the closest node is at a distance of infinity,
-    //     // we must be trapped and should therefore stop.
-    //     if (closestNode.distance === Infinity) return visitedNodesInOrder;
-    //     closestNode.isVisited = true;
-    //     visitedNodesInOrder.push(closestNode);
-    //     if (closestNode === finishNode) return visitedNodesInOrder;
-    //     updateUnvisitedNeighbors(closestNode, grid);
-    // }
+    return visitedNodes;
 }
 
 function getEdges(vertices, grid) {
-    let unpackedEdges = []
+    let unpackedEdges = [];
     let edges = vertices.map(node => getUnvisitedNeighbors(node, grid).map(neighbor => [node, neighbor]));
     for (const neighbors of edges) {
-        for (const edge of neighbors){
+        for (const edge of neighbors) {
             unpackedEdges.push(edge);
         }
     }
     return unpackedEdges;
-}
-
-function updateUnvisitedNeighbors(node, grid) {
-    const unvisitedNeighbors = getUnvisitedNeighbors(node, grid);
-    for (const neighbor of unvisitedNeighbors) {
-        relax(node, neighbor, neighbor.isWeight);
-    }
 }
 
 function relax(source, destination, isWeight) {
@@ -83,11 +62,10 @@ function getAllNodes(grid) {
 }
 
 // Backtracks from the finishNode to find the shortest path.
-// Only works when called *after* the dijkstra method above.
+// Only works when called *after* the bellmanFord method above.
 export function getNodesInShortestPathOrderBF(finishNode) {
     const nodesInShortestPathOrder = [];
     let currentNode = finishNode;
-    console.log(finishNode);
     while (currentNode !== null) {
         nodesInShortestPathOrder.unshift(currentNode);
         currentNode = currentNode.previousNode;
