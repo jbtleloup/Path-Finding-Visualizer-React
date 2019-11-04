@@ -36,9 +36,10 @@ function relax(source, destination, isWeight) {
     let weight = 1;
     if(isWeight)
         weight = 6;
-    if(destination.distance > source.distance + weight)
+    if(destination.distance > source.distance + weight) {
         destination.distance = source.distance + weight;
         destination.previousNode = source;
+    }
 }
 
 function getUnvisitedNeighbors(node, grid) {

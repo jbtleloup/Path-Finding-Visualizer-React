@@ -119,14 +119,8 @@ export default class PathfindingVisualizer extends Component {
 
     animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
         this.setState({isAnimation: true});
-        //todo: length - 1 does not work -> impossible case gives us a grid
-        // not totally explored (last nod not visually explored)
-        // use bool isEnd instead
-
-        // We don't want the animation to cover the end Node (hence - 1)
-        const visitedNodesInOrderLength = visitedNodesInOrder.length - 1;
-        // We start at 1 so the animation do not cover the start Node
-        for (let i = 1; i <= visitedNodesInOrderLength; i++) {
+        const visitedNodesInOrderLength = visitedNodesInOrder.length;
+        for (let i = 0; i <= visitedNodesInOrderLength; i++) {
             if (i === visitedNodesInOrderLength) {
                 setTimeout(() => {
                     this.animateShortestPath(nodesInShortestPathOrder);
@@ -143,13 +137,22 @@ export default class PathfindingVisualizer extends Component {
     }
 
     animateShortestPath(nodesInShortestPathOrder) {
-        // We start at one so the animation does not cover start node
-        // same for end Node (length - 1)
         for (let i = 1; i < nodesInShortestPathOrder.length - 1; i++) {
             setTimeout(() => {
+                if (i > 1) {
+                    const previousNode = nodesInShortestPathOrder[i - 1];
+                    let previousNodeDocumentElement = document.getElementById(`node-${previousNode.row}-${previousNode.col}`).childNodes;
+                    for (const icon of previousNodeDocumentElement) {
+                        if (icon.className === "fas fa-truck")
+                            icon.parentNode.removeChild(icon);
+                    }
+                }
                 const node = nodesInShortestPathOrder[i];
-                document.getElementById(`node-${node.row}-${node.col}`).className =
-                    'node node-shortest-path';
+                let nodeDocumentElement = document.getElementById(`node-${node.row}-${node.col}`);
+                nodeDocumentElement.className = 'node node-shortest-path';
+                const icon_truck = document.createElement('i');
+                icon_truck.className = 'fas fa-truck';
+                nodeDocumentElement.append(icon_truck);
             }, 50 * i);
         }
         // End of the animation, Algorithm is done
@@ -191,20 +194,19 @@ export default class PathfindingVisualizer extends Component {
     animateBellmanFord(visitedNodesInOrder, nodesInShortestPathOrder) {
         this.setState({isAnimation: true});
         // No animation on start and finish node
-        visitedNodesInOrder = visitedNodesInOrder.filter( node => (!node.isStart && !node.isFinish));
-        // We don't want the animation to cover the end Node (hence - 1)
-        const visitedNodesInOrderLength = visitedNodesInOrder.length - 1;
+        visitedNodesInOrder = visitedNodesInOrder.filter(node => (!node.isStart && !node.isFinish));
+        const visitedNodesInOrderLength = visitedNodesInOrder.length;
         for (let i = 0; i <= visitedNodesInOrderLength; i++) {
             setTimeout(() => {
                 const node = visitedNodesInOrder[i];
                 // Change background back to white
-                if (i>0) {
-                    const previousNode = visitedNodesInOrder[i-1];
+                if (i > 0) {
+                    const previousNode = visitedNodesInOrder[i - 1];
                     document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
                 }
                 // display shortest path and change background back to white to the last node
                 if (i === visitedNodesInOrderLength) {
-                    const previousNode = visitedNodesInOrder[i-1];
+                    const previousNode = visitedNodesInOrder[i - 1];
                     document.getElementById(`node-${previousNode.row}-${previousNode.col}`).classList.remove('node-visited-na');
                     setTimeout(() => {
                         this.animateShortestPath(nodesInShortestPathOrder);
@@ -213,7 +215,7 @@ export default class PathfindingVisualizer extends Component {
                 }
                 //TODO: look to get rid off that document.getElementById maybe add to condition in Node.js
                 document.getElementById(`node-${node.row}-${node.col}`).className += ' node-visited-na';
-            }, 2*i);
+            }, 2 * i);
         }
     }
 
@@ -268,10 +270,13 @@ export default class PathfindingVisualizer extends Component {
     }
 }
 const getInitialGrid = () => {
+    // WARNING: the number of rows and columns should also be modified in Node.css
+    // AND in resetNodesVisited
+    //Todo: Put row and col as Constant
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 30; row++) {
         const currentRow = [];
-        for (let col = 0; col < 50; col++) {
+        for (let col = 0; col < 60; col++) {
             currentRow.push(createNode(col, row));
         }
         grid.push(currentRow);
@@ -344,11 +349,12 @@ const getNewGridWithEndNodeUpdated = (grid, pEnd, row, col) => {
     return newGrid;
 };
 // We are resetting the grid entirely which is not optimal
+// todo: Should not create a new grid should only modify the current grid
 const resetNodesVisited = (grid) => {
     let newGrid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 30; row++) {
         const currentRow = [];
-        for (let col = 0; col < 50; col++) {
+        for (let col = 0; col < 60; col++) {
             let node = {
                 ...grid[row][col],
                 isVisited: false,
@@ -359,7 +365,6 @@ const resetNodesVisited = (grid) => {
             //Todo: take care of this document.getElementById!
             document.getElementById(`node-${node.row}-${node.col}`).classList.remove(
                 "node-visited", "node-visited-na", "node-shortest-path-na", "node-shortest-path");
-
         }
         newGrid.push(currentRow);
     }

@@ -15,23 +15,27 @@ export default class Node extends Component {
             onMouseUp,
             row,
         } = this.props;
-        const extraClassName = isFinish
-            ? 'node-finish'
+        const icon = isFinish
+            ? <i className="fas fa-flag-checkered"/>
             : isStart
-                ? 'node-start'
-                : isWall
-                    ? 'node-wall'
-                    : isWeight
-                        ? 'node-weight'
-                        : '';
+                ? <i className="fas fa-truck-loading"/>
+                : isWeight
+                    ? <i className="fas fa-traffic-light"/>
+                    : '';
+        const wallClassName = isWall ? 'node-wall' : '';
+
+
+        // <i className="fas fa-flag-checkered"></i>
+        // <i className="fas fa-truck"></i>
+        // <i className="fas fa-truck-loading"></i>
 
         return (
             <div
                 id={`node-${row}-${col}`}
-                className={`node ${extraClassName}`}
+                className={`node ${wallClassName}`}
                 onMouseDown={() => onMouseDown(row, col)}
                 onMouseEnter={() => onMouseEnter(row, col)}
-                onMouseUp={() => onMouseUp()}/>
+                onMouseUp={() => onMouseUp()}>{icon}</div>
         );
     }
 }

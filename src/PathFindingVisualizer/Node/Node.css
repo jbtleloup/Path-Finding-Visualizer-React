@@ -1,17 +1,12 @@
 .node {
+    /*60 is the number of columns and 30 the number of rows
+    please modify accordingly in PathFindingVisualizer.js
+    120px is the size of the header*/
     width: calc(100% / 60);
-    height: 25px;
+    height: calc((100vh - 120px) / 30);
     outline: 1px solid rgb(175, 216, 248);
     display: inline-block;
-    margin: -1px 0 0 0;
-}
-
-.node-finish {
-    background-color: red;
-}
-
-.node-start {
-    background-color: green;
+    vertical-align: top;
 }
 
 .node-visited {
@@ -54,10 +49,6 @@
 
 .node-wall {
     background-color: rgb(12, 53, 71);
-}
-
-.node-weight {
-    background-color: darkred;
 }
 
 .node-shortest-path-na {
